@@ -2,9 +2,12 @@ package com.app.vanshavali.home.view
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.databinding.DataBindingUtil
+import androidx.lifecycle.Observer
+import androidx.lifecycle.lifecycleScope
 import androidx.viewpager2.widget.ViewPager2
 import com.app.vanshavali.R
 import com.app.vanshavali.application.RoomApplication
@@ -31,16 +34,18 @@ class LandingActivity : BaseActivity() {
 
     private var binding: LandingActivityBinding? = null
 
+    private var isLoadedFromDB = false
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
-        landingActivityViewModel.allCategories.observe(this) { catEntity ->
-            viewPagerSetup(catEntity)
-        }
 
+        landingActivityViewModel.allCategories.observe(this) { catEntity ->
+            if (catEntity.isNotEmpty()) {
+                viewPagerSetup(catEntity)
+            }
+        }
         binding?.btnCreateAccount?.setOnClickListener {
-//            Toast.makeText(this, "".plus(getItem()), Toast.LENGTH_SHORT).show()
-            var catDetails = viewPagerAdapter?.getSelectedCatDetails(position = getItem())
+            val catDetails = viewPagerAdapter?.getSelectedCatDetails(position = getItem())
             val intent =
                 Intent(applicationContext, CatDetailsActivity::class.java)
                     .putExtra(ARG_CATEGORY_ID, catDetails?.categoryId)
@@ -51,7 +56,15 @@ class LandingActivity : BaseActivity() {
             Animatoo.animateSlideLeft(this)
         }
         landingActivityViewModel.delete()
-        initCategoryDatabase()
+        //initCategoryDatabase()
+        landingActivityViewModel.isAllDataSavedLiveObserver().observe(this) {
+            Log.e("observe", "onCreate: $it", )
+        }
+        landingActivityViewModel.getCategoryListFromFirebase(
+            (application as RoomApplication).firebaseDatabase.child(
+                "categories"
+            )
+        )
     }
 
     private fun viewPagerSetup(list: List<CatEntity>) {

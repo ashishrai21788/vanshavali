@@ -93,13 +93,13 @@ class MainListAdapter(
             binding.address = mainEntity.address
             binding.memberId = "User Id: ".plus(mainEntity.memberId)
 
-            Glide
-                .with(itemView.context)
-                .load(mainEntity.profileImage)
-                .centerCrop()
-                .placeholder(R.drawable.default_user)
-                .error(R.drawable.default_user)
-                .into(binding?.userImage)
+//            Glide
+//                .with(itemView.context)
+//                .load(mainEntity.profileImage)
+//                .centerCrop()
+//                .placeholder(R.drawable.default_user)
+//                .error(R.drawable.default_user)
+//                .into(binding?.userImage)
 
         }
 
@@ -147,7 +147,7 @@ class MainListAdapter(
                     filterList = mainList
                     submitList(filterList)
                 } else {
-                     var resultList: MutableList<MainEntity> = arrayListOf()
+                     val resultList: MutableList<MainEntity> = arrayListOf()
                     for (row in mainList) {
                         if (row.nameEnglish.startsWith(
                                 charSearch.lowercase(Locale.ROOT),

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "564401557455",
+    "project_id": "vanshavali-b9930",
+    "storage_bucket": "vanshavali-b9930.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:564401557455:android:ec26e3f78470214c5bccba",
+        "android_client_info": {
+          "package_name": "com.app.vanshavali"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAS-tGkLXb8UCrNBvtH32MbdXsxcHtikoQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

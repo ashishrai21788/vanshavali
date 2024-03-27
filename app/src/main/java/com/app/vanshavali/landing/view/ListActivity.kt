@@ -28,6 +28,7 @@ import com.google.gson.Gson
 import org.json.JSONObject
 
 class ListActivity : BaseActivity(), MainOnItemClickListener {
+    private val TAG = ListActivity::class.java.simpleName
     private val listActivityViewModel: ListActivityViewModel by viewModels {
         ListActivityViewModel.ListActivityViewModelFactory((application as RoomApplication).repositoryMain)
     }
@@ -45,6 +46,7 @@ class ListActivity : BaseActivity(), MainOnItemClickListener {
     private var binding: ListActivityBinding? = null
     private var recordSize = 0
     private var adapter: MainListAdapter? = null
+    private var isLoadedFromDB = false
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 //        window.statusBarColor = ContextCompat.getColor(this, R.color.white)
@@ -60,29 +62,31 @@ class ListActivity : BaseActivity(), MainOnItemClickListener {
                 intent.getStringExtra(ARG_CATEGORY_IMAGE).toString()
         }
 
-
+        listActivityViewModel.allList.observe(this) { catEntity ->
+            if(catEntity.isNotEmpty()){
+            binding?.count = "".plus(catEntity.size)
+            catEntity.let {
+                adapter?.submitList(it)
+                adapter?.mainList = it as MutableList<MainEntity>
+                binding?.progressBar?.visibility = View.GONE
+            }
+            }
+        }
         val recyclerView = findViewById<RecyclerView>(R.id.recyclerview)
         adapter =
             MainListAdapter(this, repository = (application as RoomApplication).repositoryMain)
         recyclerView.adapter = adapter
         recyclerView.layoutManager = LinearLayoutManager(this)
         binding?.progressBar?.visibility = View.VISIBLE
-        listActivityViewModel.allList.observe(this) { catEntity ->
-            Log.i("getAllCategories", "test ".plus(catEntity.size))
-            binding?.count = "".plus(catEntity.size)
-            if (recordSize == catEntity.size) {
-                catEntity.let {
-                    adapter?.submitList(it)
-                    adapter?.mainList = it as MutableList<MainEntity>
-                    binding?.progressBar?.visibility = View.GONE
-                }
-            }
-        }
+
 
         binding?.searchInput?.addTextChangedListener(object : TextWatcher {
 
             override fun afterTextChanged(newText: Editable) {
                 adapter?.filter?.filter(newText)
+                if(newText.isEmpty()){
+                    recyclerView.scrollToPosition(0)
+                }
             }
 
             override fun beforeTextChanged(
@@ -106,7 +110,15 @@ class ListActivity : BaseActivity(), MainOnItemClickListener {
             Animatoo.animateSlideLeft(this)
         }
         listActivityViewModel.delete()
-        initListDatabase()
+        // initListDatabase()
+        listActivityViewModel.isAllDataSavedLiveObserver().observe(this) {
+            Log.e("observe", "onCreate: $it", )
+        }
+        listActivityViewModel.getMainListFromFirebase(
+            (application as RoomApplication).firebaseDatabase.child(
+                "main_list"
+            )
+        )
     }
 
     override fun onResume() {
@@ -143,17 +155,17 @@ class ListActivity : BaseActivity(), MainOnItemClickListener {
                             noOfChildren = item.optString("no_of_children"),
                             wifeId = item.optString("wife_id"),
                             noOfMarriage = item.optString("no_of_marriage"),
-                            item.optString("page_no"),
-                            item.optString("category_id"),
-                            item.optString("dob"),
-                            item.optString("doe"),
-                            item.optString("profile_image"),
-                            item.optString("address"),
-                            item.optString("mobile_number"),
-                            item.optString("occupation"),
-                            item.optString("position_hold"),
-                            item.optString("from_to_year"),
-                            item.optString("remarks"),
+                            pageNo = item.optString("page_no"),
+                            categoryId = item.optString("category_id"),
+                            dob = item.optString("dob"),
+                            doe = item.optString("doe"),
+                            profileImage = item.optString("profile_image"),
+                            address = item.optString("address"),
+                            mobileNumber = item.optString("mobile_number"),
+                            occupation = item.optString("occupation"),
+                            positionHold = item.optString("position_hold"),
+                            fromToYear = item.optString("from_to_year"),
+                            remarks = item.optString("remarks"),
                         )
                         listActivityViewModel.insert(mainEntity)
                     }

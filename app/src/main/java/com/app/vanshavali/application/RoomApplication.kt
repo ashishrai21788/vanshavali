@@ -21,10 +21,14 @@ import android.app.Application
 import com.app.vanshavali.database.BaseRoomDatabase
 import com.app.vanshavali.home.repo.RoomRepository
 import com.app.vanshavali.landing.repo.MainRepository
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.FirebaseDatabase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 
 class RoomApplication : Application() {
+
+    lateinit var firebaseDatabase: DatabaseReference
     // No need to cancel this scope as it'll be torn down with the process
     val applicationScope = CoroutineScope(SupervisorJob())
     // Using by lazy so the database and the repository are only created when they're needed
@@ -32,4 +36,10 @@ class RoomApplication : Application() {
     val database by lazy { BaseRoomDatabase.getDatabase(this, applicationScope) }
     val repository by lazy { RoomRepository(database.catDao()) }
     val repositoryMain by lazy { MainRepository(database.mainDao()) }
+
+    override fun onCreate() {
+        super.onCreate()
+        firebaseDatabase = FirebaseDatabase.getInstance().reference
+    }
+
 }
